@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tiến độ thanh toán - Eco</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: #f5f7fa;
+        color: #1a1a2e;
+        min-height: 100vh;
+        padding: 0 0 40px;
+      }
+
+      header {
+        background: linear-gradient(135deg, #0f4c75, #1b9aaa);
+        color: white;
+        padding: 24px 20px;
+        text-align: center;
+      }
+
+      header h1 {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+
+      header p {
+        font-size: 13px;
+        opacity: 0.85;
+      }
+
+      .config {
+        display: flex;
+        gap: 12px;
+        padding: 16px 20px;
+        flex-wrap: wrap;
+      }
+
+      .config-field {
+        flex: 1;
+        min-width: 140px;
+        background: white;
+        border-radius: 12px;
+        padding: 12px 14px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+      }
+
+      .config-field label {
+        display: block;
+        font-size: 11px;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+      }
+
+      .config-field input {
+        width: 100%;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 15px;
+        font-weight: 600;
+        color: #0f4c75;
+        background: #f8fafc;
+        outline: none;
+      }
+
+      .config-field input:focus {
+        border-color: #1b9aaa;
+        background: white;
+      }
+
+      .summary {
+        display: flex;
+        gap: 12px;
+        padding: 4px 20px 16px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .summary-card {
+        flex: 1;
+        min-width: 100px;
+        background: white;
+        border-radius: 12px;
+        padding: 12px 14px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        text-align: center;
+      }
+
+      .summary-card .label {
+        font-size: 11px;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+      }
+
+      .summary-card .value {
+        font-size: 16px;
+        font-weight: 700;
+        color: #0f4c75;
+      }
+
+      .summary-card .value small {
+        font-size: 11px;
+        font-weight: 400;
+        color: #999;
+      }
+
+      .progress-bar {
+        margin: 0 20px 16px;
+        background: #e8e8e8;
+        border-radius: 6px;
+        height: 8px;
+        overflow: hidden;
+      }
+
+      .progress-bar .fill {
+        height: 100%;
+        background: linear-gradient(90deg, #1b9aaa, #0f4c75);
+        border-radius: 6px;
+        transition: width 0.4s ease;
+      }
+
+      .timeline {
+        padding: 8px 20px;
+      }
+
+      .timeline h2 {
+        font-size: 15px;
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 16px;
+        padding-left: 4px;
+      }
+
+      .milestone {
+        display: flex;
+        gap: 14px;
+        position: relative;
+        padding-bottom: 4px;
+      }
+
+      .milestone:last-child .track::after {
+        display: none;
+      }
+
+      .track {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex-shrink: 0;
+        width: 32px;
+        position: relative;
+      }
+
+      .dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #ccc;
+        border: 3px solid #e8e8e8;
+        z-index: 1;
+        flex-shrink: 0;
+        margin-top: 16px;
+      }
+
+      .milestone.completed .dot {
+        background: #1b9aaa;
+        border-color: #d0f0f5;
+      }
+
+      .milestone.active .dot {
+        background: #f77f00;
+        border-color: #fde8d0;
+        box-shadow: 0 0 0 4px rgba(247, 127, 0, 0.15);
+      }
+
+      .track::after {
+        content: "";
+        position: absolute;
+        top: 32px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 2px;
+        height: calc(100% - 26px);
+        background: #e0e0e0;
+      }
+
+      .milestone.completed .track::after {
+        background: #1b9aaa;
+      }
+
+      .card {
+        flex: 1;
+        background: white;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        border-left: 3px solid #e0e0e0;
+      }
+
+      .milestone.completed .card {
+        border-left-color: #1b9aaa;
+      }
+
+      .milestone.active .card {
+        border-left-color: #f77f00;
+        box-shadow: 0 2px 8px rgba(247, 127, 0, 0.12);
+      }
+
+      .card .time {
+        font-size: 12px;
+        font-weight: 600;
+        color: #1b9aaa;
+        margin-bottom: 2px;
+      }
+
+      .card .date {
+        font-size: 11px;
+        color: #aaa;
+        margin-bottom: 6px;
+      }
+
+      .milestone.active .card .time {
+        color: #f77f00;
+      }
+
+      .card .title {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .card .amount {
+        font-size: 14px;
+        color: #e63946;
+        font-weight: 600;
+      }
+
+      .card .amount-note {
+        font-size: 12px;
+        color: #999;
+        font-weight: 400;
+      }
+
+      .card .desc {
+        font-size: 13px;
+        color: #777;
+        margin-top: 4px;
+        line-height: 1.5;
+      }
+
+      .card .badge {
+        display: inline-block;
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 10px;
+        margin-top: 6px;
+        font-weight: 600;
+      }
+
+      .badge.done {
+        background: #d0f5e6;
+        color: #0a7c42;
+      }
+
+      .badge.current {
+        background: #fde8d0;
+        color: #c45e00;
+      }
+
+      .badge.upcoming {
+        background: #e8e8e8;
+        color: #888;
+      }
+
+      .note {
+        margin: 20px 20px 0;
+        padding: 14px 16px;
+        background: #fff9e6;
+        border-radius: 12px;
+        border-left: 3px solid #f0c040;
+        font-size: 13px;
+        color: #7a6b2a;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Tiến độ thanh toán</h1>
+      <p>Dự án Eco</p>
+    </header>
+
+    <div class="config">
+      <div class="config-field">
+        <label for="tDate">Ngày T (ký TTĐC)</label>
+        <input type="date" id="tDate" value="2026-05-01" />
+      </div>
+      <div class="config-field">
+        <label for="totalInput">Tổng giá trị (VNĐ)</label>
+        <input
+          type="text"
+          id="totalInput"
+          value="5.000.000.000"
+          inputmode="numeric"
+        />
+      </div>
+    </div>
+
+    <div class="summary" id="summary"></div>
+    <div class="progress-bar"><div class="fill" id="progressFill"></div></div>
+    <div class="timeline">
+      <h2>Lịch thanh toán</h2>
+      <div id="milestoneList"></div>
+    </div>
+
+    <div class="note">
+      <strong>Lưu ý:</strong> Các mốc thời gian tính từ ngày ký TTĐC (T).
+      Lần 1 và ký HĐMB đã bao gồm khoản đặt cọc. Lần 7 cần thanh toán thêm
+      100% phí bảo trì (PBT) và thuế VAT của 5% giá bán. Lần 8 chưa bao gồm
+      thuế GTGT. Vui lòng liên hệ tư vấn viên để cập nhật chính xác nhất.
+    </div>
+
+    <script>
+      // --- Data ---
+      const MILESTONES = [
+        {
+          label: "Đặt cọc và ký TTĐC",
+          timeLabel: "T",
+          offsetDays: 0,
+          type: "fixed",
+          fixedAmount: 200000000,
+          desc: "200.000.000 VND/Căn",
+        },
+        {
+          label: "Thanh toán lần 1",
+          timeLabel: "T + 7 ngày",
+          offsetDays: 7,
+          type: "cumulative",
+          percent: 5,
+          desc: "05% giá bán Nhà Ở (gồm thuế GTGT)",
+          note: "Đã bao gồm các khoản đặt cọc",
+        },
+        {
+          label: "Ký HĐMB",
+          timeLabel: "T + 30 ngày",
+          offsetDays: 30,
+          type: "cumulative",
+          percent: 20,
+          desc: "20% giá bán Nhà Ở (gồm thuế GTGT)",
+          note: "Đã bao gồm các khoản đặt cọc",
+        },
+        {
+          label: "Thanh toán lần 2",
+          timeLabel: "T + 2 tháng",
+          offsetMonths: 2,
+          type: "incremental",
+          percent: 5,
+          desc: "05% giá bán Nhà Ở (gồm thuế GTGT)",
+        },
+        {
+          label: "Thanh toán lần 3",
+          timeLabel: "T + 3 tháng",
+          offsetMonths: 3,
+          type: "incremental",
+          percent: 10,
+          desc: "10% giá bán Nhà Ở (gồm thuế GTGT)",
+        },
+        {
+          label: "Thanh toán lần 4",
+          timeLabel: "T + 4 tháng",
+          offsetMonths: 4,
+          type: "incremental",
+          percent: 10,
+          desc: "10% giá bán Nhà Ở (gồm thuế GTGT)",
+        },
+        {
+          label: "Thanh toán lần 5",
+          timeLabel: "T + 6 tháng",
+          offsetMonths: 6,
+          type: "incremental",
+          percent: 10,
+          desc: "10% giá bán Nhà Ở (gồm thuế GTGT)",
+        },
+        {
+          label: "Thanh toán lần 6",
+          timeLabel: "T + 8 tháng",
+          offsetMonths: 8,
+          type: "incremental",
+          percent: 10,
+          desc: "10% giá bán Nhà Ở (gồm thuế GTGT)",
+        },
+        {
+          label: "Bàn giao nhà — Lần 7",
+          timeLabel: "Dự kiến T + 12 tháng",
+          offsetMonths: 12,
+          type: "incremental",
+          percent: 25,
+          desc: "25% giá bán Nhà Ở + 100% PBT + VAT của 5% giá bán",
+        },
+        {
+          label: "Nhận GCN — Lần 8",
+          timeLabel: "Theo thông báo CĐT",
+          offsetMonths: null,
+          type: "incremental",
+          percent: 5,
+          desc: "05% giá bán Nhà Ở (chưa bao gồm thuế GTGT)",
+        },
+      ];
+
+      // --- Helpers ---
+      function formatVND(n) {
+        return Math.round(n)
+          .toString()
+          .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      }
+
+      function parseVND(str) {
+        return parseInt(str.replace(/\D/g, "")) || 0;
+      }
+
+      function addDays(date, days) {
+        const d = new Date(date);
+        d.setDate(d.getDate() + days);
+        return d;
+      }
+
+      function addMonths(date, months) {
+        const d = new Date(date);
+        d.setMonth(d.getMonth() + months);
+        return d;
+      }
+
+      function formatDate(d) {
+        return d.toLocaleDateString("vi-VN", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
+      }
+
+      // --- Render ---
+      function render() {
+        const tVal = document.getElementById("tDate").value;
+        const T = new Date(tVal + "T00:00:00");
+        const total = parseVND(document.getElementById("totalInput").value);
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Compute each milestone's date, payment amount, and status
+        let cumulativePaid = 0;
+        let foundActive = false;
+        const computed = MILESTONES.map((m) => {
+          // Date
+          let date = null;
+          if (m.offsetMonths != null) {
+            date = addMonths(T, m.offsetMonths);
+          }
+          if (m.offsetDays != null && m.offsetMonths == null) {
+            date = addDays(T, m.offsetDays);
+          }
+
+          // Payment amount for this step
+          let payment = 0;
+          if (m.type === "fixed") {
+            payment = m.fixedAmount;
+            cumulativePaid += payment;
+          } else if (m.type === "cumulative") {
+            const target = total * (m.percent / 100);
+            payment = Math.max(0, target - cumulativePaid);
+            cumulativePaid = target;
+          } else {
+            payment = total * (m.percent / 100);
+            cumulativePaid += payment;
+          }
+
+          // Status
+          let status = "upcoming";
+          if (date && date < today && !foundActive) {
+            status = "completed";
+          }
+
+          return { ...m, date, payment, cumulativePaid, status };
+        });
+
+        // Mark the first non-completed as active
+        for (let i = 0; i < computed.length; i++) {
+          if (computed[i].status === "upcoming") {
+            computed[i].status = "active";
+            break;
+          }
+        }
+
+        // Find how much has been "paid" (all completed milestones)
+        let totalPaid = 0;
+        for (const c of computed) {
+          if (c.status === "completed") totalPaid += c.payment;
+        }
+
+        const percentPaid =
+          total > 0 ? Math.min(100, (totalPaid / total) * 100) : 0;
+
+        // Summary
+        document.getElementById("summary").innerHTML = `
+          <div class="summary-card">
+            <div class="label">Tổng giá trị</div>
+            <div class="value">${formatVND(total)} <small>₫</small></div>
+          </div>
+          <div class="summary-card">
+            <div class="label">Đã đến hạn</div>
+            <div class="value">${formatVND(totalPaid)} <small>₫</small></div>
+          </div>
+          <div class="summary-card">
+            <div class="label">Còn lại</div>
+            <div class="value">${formatVND(Math.max(0, total - totalPaid))} <small>₫</small></div>
+          </div>
+        `;
+
+        document.getElementById("progressFill").style.width =
+          percentPaid + "%";
+
+        // Milestones
+        let html = "";
+        computed.forEach((c) => {
+          const statusClass = c.status;
+          const badgeClass =
+            c.status === "completed"
+              ? "done"
+              : c.status === "active"
+                ? "current"
+                : "upcoming";
+          const badgeText =
+            c.status === "completed"
+              ? "Đã đến hạn"
+              : c.status === "active"
+                ? "Sắp đến hạn"
+                : "Chưa đến hạn";
+
+          const dateStr = c.date ? formatDate(c.date) : "Chưa xác định";
+          const percentStr = c.percent ? `(${c.percent}%)` : "";
+          const noteStr = c.note
+            ? `<div class="amount-note">${c.note}</div>`
+            : "";
+
+          html += `
+            <div class="milestone ${statusClass}">
+              <div class="track"><div class="dot"></div></div>
+              <div class="card">
+                <div class="time">${c.timeLabel}</div>
+                <div class="date">${dateStr}</div>
+                <div class="title">${c.label}</div>
+                <div class="amount">${formatVND(c.payment)} ₫ <span class="amount-note">${percentStr}</span></div>
+                ${noteStr}
+                <div class="desc">${c.desc}</div>
+                <span class="badge ${badgeClass}">${badgeText}</span>
+              </div>
+            </div>
+          `;
+        });
+
+        document.getElementById("milestoneList").innerHTML = html;
+      }
+
+      // --- Events ---
+      document.getElementById("tDate").addEventListener("change", render);
+
+      const totalInput = document.getElementById("totalInput");
+      totalInput.addEventListener("input", function () {
+        const raw = parseVND(this.value);
+        if (raw > 0) {
+          const pos = this.selectionStart;
+          const oldLen = this.value.length;
+          this.value = formatVND(raw);
+          const newLen = this.value.length;
+          this.setSelectionRange(
+            pos + (newLen - oldLen),
+            pos + (newLen - oldLen)
+          );
+        }
+        render();
+      });
+
+      // Initial render
+      render();
+    </script>
+  </body>
+</html>
