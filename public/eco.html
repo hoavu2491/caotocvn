@@ -427,17 +427,12 @@
         <input type="text" id="tDateDisplay" value="01/05/2026" readonly />
         <input type="date" id="tDate" value="2026-05-01" style="display:none" />
       </div>
-      <div class="config-field">
+      <div class="config-field" style="cursor:pointer" id="totalField">
         <div class="label-row">
-          <label for="totalInput">Tổng giá trị (VNĐ)</label>
+          <label>Tổng giá trị (VNĐ): <strong id="totalDisplay"></strong></label>
           <button class="three-dot" id="priceMenuBtn">&#x22EF;</button>
         </div>
-        <input
-          type="text"
-          id="totalInput"
-          value="5.000.000.000"
-          inputmode="numeric"
-        />
+        <input type="hidden" id="totalInput" value="5.000.000.000" />
       </div>
     </div>
 
@@ -451,7 +446,8 @@
         <button class="price-option" data-value="10000000000">10.000.000.000 ₫</button>
         <div class="divider">hoặc nhập giá trị khác</div>
         <div class="custom-row">
-          <input type="text" id="customPrice" placeholder="Nhập số tiền" inputmode="numeric" />
+          <input type="number" id="customPrice" placeholder="VD: 5200" inputmode="numeric" />
+          <span style="font-size:13px;color:#888;align-self:center">triệu</span>
           <button id="customPriceBtn">OK</button>
         </div>
       </div>
@@ -558,6 +554,28 @@
         },
       ];
 
+      // --- URL State ---
+      function loadStateFromURL() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.has("date")) {
+          document.getElementById("tDate").value = params.get("date");
+        }
+        if (params.has("total")) {
+          document.getElementById("totalInput").value = formatVND(Number(params.get("total")));
+        }
+      }
+
+      function saveStateToURL() {
+        const date = document.getElementById("tDate").value;
+        const total = parseVND(document.getElementById("totalInput").value);
+        const params = new URLSearchParams();
+        params.set("date", date);
+        params.set("total", total);
+        history.replaceState(null, "", "?" + params.toString());
+      }
+
+      loadStateFromURL();
+
       // --- Helpers ---
       function formatVND(n) {
         return Math.round(n)
@@ -567,6 +585,17 @@
 
       function parseVND(str) {
         return parseInt(str.replace(/\D/g, "")) || 0;
+      }
+
+      function formatVNDReadable(n) {
+        n = Math.round(n);
+        const ty = Math.floor(n / 1000000000);
+        const trieu = Math.floor((n % 1000000000) / 1000000);
+        const parts = [];
+        if (ty > 0) parts.push(ty + " Tỷ");
+        if (trieu > 0) parts.push(trieu + " triệu");
+        if (parts.length === 0) parts.push(formatVND(n) + " ₫");
+        return parts.join(" ");
       }
 
       function addDays(date, days) {
@@ -595,6 +624,7 @@
         const T = new Date(tVal + "T00:00:00");
         document.getElementById("tDateDisplay").value = tVal.split("-").reverse().join("/");
         const total = parseVND(document.getElementById("totalInput").value);
+        document.getElementById("totalDisplay").textContent = formatVNDReadable(total);
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -703,6 +733,7 @@
         });
 
         document.getElementById("milestoneList").innerHTML = html;
+        saveStateToURL();
       }
 
       // --- Events ---
@@ -716,25 +747,15 @@
       });
 
       const totalInput = document.getElementById("totalInput");
-      totalInput.addEventListener("input", function () {
-        const raw = parseVND(this.value);
-        if (raw > 0) {
-          const pos = this.selectionStart;
-          const oldLen = this.value.length;
-          this.value = formatVND(raw);
-          const newLen = this.value.length;
-          this.setSelectionRange(
-            pos + (newLen - oldLen),
-            pos + (newLen - oldLen)
-          );
-        }
-        render();
-      });
 
       // --- Price modal ---
       const priceModal = document.getElementById("priceModal");
-      document.getElementById("priceMenuBtn").addEventListener("click", function () {
+      function openPriceModal() {
         priceModal.classList.add("show");
+      }
+      document.getElementById("priceMenuBtn").addEventListener("click", openPriceModal);
+      document.getElementById("totalField").addEventListener("click", function (e) {
+        if (e.target.id !== "priceMenuBtn") openPriceModal();
       });
       priceModal.addEventListener("click", function (e) {
         if (e.target === priceModal) priceModal.classList.remove("show");
@@ -753,21 +774,10 @@
       });
 
       const customPriceInput = document.getElementById("customPrice");
-      customPriceInput.addEventListener("input", function () {
-        const raw = parseVND(this.value);
-        if (raw > 0) {
-          const pos = this.selectionStart;
-          const oldLen = this.value.length;
-          this.value = formatVND(raw);
-          const newLen = this.value.length;
-          this.setSelectionRange(pos + (newLen - oldLen), pos + (newLen - oldLen));
-        }
-      });
-
       document.getElementById("customPriceBtn").addEventListener("click", function () {
-        const raw = parseVND(customPriceInput.value);
+        const raw = Number(customPriceInput.value);
         if (raw > 0) {
-          applyPrice(raw);
+          applyPrice(raw * 1000000);
           customPriceInput.value = "";
         }
       });
