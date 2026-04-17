@@ -246,6 +246,7 @@
       }
 
       .card .amount {
+        margin-top: 5px;
         font-size: 14px;
         color: #e63946;
         font-weight: 600;
@@ -722,10 +723,9 @@
               <div class="track"><div class="dot"></div></div>
               <div class="card">
                 <div class="time">${c.timeLabel} <span class="date">${dateStr}</span></div>
-                <div class="title">${c.label}</div>
                 <div class="amount">${formatVND(c.payment)} ₫ <span class="amount-note">${percentStr}</span></div>
                 ${noteStr}
-                <div class="desc">${c.desc}</div>
+                <div class="desc">${c.label + " | " +c.desc}</div>
                 <span class="badge ${badgeClass}">${badgeText}</span>
               </div>
             </div>
