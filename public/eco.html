@@ -424,8 +424,7 @@
     <div class="config">
       <div class="config-field">
         <label for="tDate">Ngày T (ký TTĐC)</label>
-        <input type="text" id="tDateDisplay" value="01/05/2026" readonly />
-        <input type="date" id="tDate" value="2026-05-01" style="display:none" />
+        <input type="date" id="tDate" value="2026-05-01" />
       </div>
       <div class="config-field" style="cursor:pointer" id="totalField">
         <div class="label-row">
@@ -622,7 +621,6 @@
       function render() {
         const tVal = document.getElementById("tDate").value;
         const T = new Date(tVal + "T00:00:00");
-        document.getElementById("tDateDisplay").value = tVal.split("-").reverse().join("/");
         const total = parseVND(document.getElementById("totalInput").value);
         document.getElementById("totalDisplay").textContent = formatVNDReadable(total);
 
@@ -737,14 +735,7 @@
       }
 
       // --- Events ---
-      const tDatePicker = document.getElementById("tDate");
-      document.getElementById("tDateDisplay").addEventListener("click", function () {
-        tDatePicker.style.display = tDatePicker.style.display === "none" ? "block" : "none";
-      });
-      tDatePicker.addEventListener("change", function () {
-        tDatePicker.style.display = "none";
-        render();
-      });
+      document.getElementById("tDate").addEventListener("change", render);
 
       const totalInput = document.getElementById("totalInput");
 
