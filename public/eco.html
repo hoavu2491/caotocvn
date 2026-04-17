@@ -300,17 +300,15 @@
   </head>
   <body>
     <header>
-      <h1>Tiến độ thanh toán</h1>
-      <p>Dự án Eco</p>
+      <h1>Dự án Eco Retreat Long An (Tây Ninh mới)</h1>
+      <p>Lịch thanh toán</p>
     </header>
 
     <div class="config">
       <div class="config-field">
         <label for="tDate">Ngày T (ký TTĐC)</label>
-        <div style="position:relative">
-          <input type="date" id="tDate" value="2026-05-01" style="color:transparent" />
-          <span id="tDateDisplay" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none">01/05/2026</span>
-        </div>
+        <input type="text" id="tDateDisplay" value="01/05/2026" readonly />
+        <input type="date" id="tDate" value="2026-05-01" style="display:none" />
       </div>
       <div class="config-field">
         <label for="totalInput">Tổng giá trị (VNĐ)</label>
@@ -459,7 +457,7 @@
       function render() {
         const tVal = document.getElementById("tDate").value;
         const T = new Date(tVal + "T00:00:00");
-        document.getElementById("tDateDisplay").textContent = tVal.split("-").reverse().join("/");
+        document.getElementById("tDateDisplay").value = tVal.split("-").reverse().join("/");
         const total = parseVND(document.getElementById("totalInput").value);
 
         const today = new Date();
@@ -572,7 +570,14 @@
       }
 
       // --- Events ---
-      document.getElementById("tDate").addEventListener("change", render);
+      const tDatePicker = document.getElementById("tDate");
+      document.getElementById("tDateDisplay").addEventListener("click", function () {
+        tDatePicker.style.display = tDatePicker.style.display === "none" ? "block" : "none";
+      });
+      tDatePicker.addEventListener("change", function () {
+        tDatePicker.style.display = "none";
+        render();
+      });
 
       const totalInput = document.getElementById("totalInput");
       totalInput.addEventListener("input", function () {
