@@ -40,14 +40,13 @@
 
       .config {
         display: flex;
+        flex-direction: column;
         gap: 12px;
         padding: 16px 20px;
-        flex-wrap: wrap;
       }
 
       .config-field {
-        flex: 1;
-        min-width: 140px;
+        width: 100%;
         background: white;
         border-radius: 12px;
         padding: 12px 14px;
@@ -308,7 +307,10 @@
     <div class="config">
       <div class="config-field">
         <label for="tDate">Ngày T (ký TTĐC)</label>
-        <input type="date" id="tDate" value="2026-05-01" />
+        <div style="position:relative">
+          <input type="date" id="tDate" value="2026-05-01" style="color:transparent" />
+          <span id="tDateDisplay" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none">01/05/2026</span>
+        </div>
       </div>
       <div class="config-field">
         <label for="totalInput">Tổng giá trị (VNĐ)</label>
@@ -457,6 +459,7 @@
       function render() {
         const tVal = document.getElementById("tDate").value;
         const T = new Date(tVal + "T00:00:00");
+        document.getElementById("tDateDisplay").textContent = tVal.split("-").reverse().join("/");
         const total = parseVND(document.getElementById("totalInput").value);
 
         const today = new Date();
@@ -518,16 +521,8 @@
         // Summary
         document.getElementById("summary").innerHTML = `
           <div class="summary-card">
-            <div class="label">Tổng giá trị</div>
-            <div class="value">${formatVND(total)} <small>₫</small></div>
-          </div>
-          <div class="summary-card">
             <div class="label">Đã đến hạn</div>
             <div class="value">${formatVND(totalPaid)} <small>₫</small></div>
-          </div>
-          <div class="summary-card">
-            <div class="label">Còn lại</div>
-            <div class="value">${formatVND(Math.max(0, total - totalPaid))} <small>₫</small></div>
           </div>
         `;
 
