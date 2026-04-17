@@ -51,6 +51,7 @@
         border-radius: 12px;
         padding: 12px 14px;
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
       }
 
       .config-field label {
@@ -64,6 +65,7 @@
 
       .config-field input {
         width: 100%;
+        max-width: 100%;
         border: 1px solid #e0e0e0;
         border-radius: 8px;
         padding: 8px 10px;
@@ -72,6 +74,8 @@
         color: #0f4c75;
         background: #f8fafc;
         outline: none;
+        -webkit-appearance: none;
+        appearance: none;
       }
 
       .config-field input:focus {
@@ -427,7 +431,7 @@
 
     <div class="config">
       <div class="config-field">
-        <label for="tDate">Ngày T (ký TTĐC)</label>
+        <label for="tDate">Ngày T (ký thỏa thuận đặt cọc)</label>
         <input type="date" id="tDate" value="2026-05-01" />
       </div>
       <div class="config-field" style="cursor:pointer" id="totalField">
