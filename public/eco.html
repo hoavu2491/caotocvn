@@ -141,12 +141,12 @@
         font-weight: 600;
         color: #555;
         margin-bottom: 16px;
-        padding-left: 4px;
+        text-align: center;
       }
 
       .milestone {
         display: flex;
-        gap: 14px;
+        gap: 8px;
         position: relative;
         padding-bottom: 4px;
       }
@@ -160,16 +160,16 @@
         flex-direction: column;
         align-items: center;
         flex-shrink: 0;
-        width: 32px;
+        width: 16px;
         position: relative;
       }
 
       .dot {
-        width: 14px;
-        height: 14px;
+        width: 10px;
+        height: 10px;
         border-radius: 50%;
         background: #ccc;
-        border: 3px solid #e8e8e8;
+        border: 2px solid #e8e8e8;
         z-index: 1;
         flex-shrink: 0;
         margin-top: 16px;
@@ -183,17 +183,17 @@
       .milestone.active .dot {
         background: #f77f00;
         border-color: #fde8d0;
-        box-shadow: 0 0 0 4px rgba(247, 127, 0, 0.15);
+        box-shadow: 0 0 0 3px rgba(247, 127, 0, 0.15);
       }
 
       .track::after {
         content: "";
         position: absolute;
-        top: 32px;
+        top: 28px;
         left: 50%;
         transform: translateX(-50%);
         width: 2px;
-        height: calc(100% - 26px);
+        height: calc(100% - 22px);
         background: #e0e0e0;
       }
 
